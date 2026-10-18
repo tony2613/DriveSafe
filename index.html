@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DriveSafe SDK - Telematics & Touch Enforcement</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="navbar">
+        <div class="brand">
+          <div class="logo-badge"><span class="shield-icon">🛡️</span></div>
+          <div class="brand-text">
+            <h1>DriveSafe <span>SDK</span></h1>
+            <p class="subtitle">Enterprise Telematics & In-App UI Touch Enforcement Layer</p>
+          </div>
+        </div>
+        <div class="nav-metrics">
+          <div class="metric-pill"><span class="dot live-pulse"></span><span class="label">SDK CORE:</span><span class="val" id="sdk-version-badge">v2.4-STABLE</span></div>
+          <div class="metric-pill hotspot-pill" id="global-hotspot-pill"><span class="label">BTP HOTSPOT:</span><span class="val" id="global-hotspot-status">STANDARD ZONE</span></div>
+          <button class="btn-primary" id="btn-export-payload"><span>🔐 Export Insurer Payload</span></button>
+        </div>
+      </header>
+      <main class="simulator-layout">
+        <section class="panel control-panel">
+          <div class="panel-header"><h2>🕹️ Telematics Cockpit</h2><span class="badge">Hardware Emulator</span></div>
+          <div class="control-group">
+            <div class="control-label-row"><label for="speed-slider">Vehicle Speed</label><div class="digital-gauge"><span id="speed-display">0</span> <small>km/h</small></div></div>
+            <input type="range" id="speed-slider" min="0" max="80" value="0" step="1" class="custom-range" />
+            <div class="speed-presets">
+              <button class="preset-btn active" data-speed="0">🛑 Stop (0)</button>
+              <button class="preset-btn" data-speed="12">🚶 Traffic (12)</button>
+              <button class="preset-btn" data-speed="25">🚗 Cruising (25)</button>
+              <button class="preset-btn" data-speed="55">⚡ Highway (55)</button>
+            </div>
+          </div>
+          <div class="control-group">
+            <label for="hotspot-select">Simulated GPS Coordinates (Bengaluru)</label>
+            <select id="hotspot-select" class="custom-select">
+              <option value="standard">Indiranagar 100ft Road (Standard Zone - 3 Strikes)</option>
+              <option value="btp_silkboard">Central Silk Board Junction [BTP Blackspot - 1 Strike]</option>
+              <option value="btp_tinfactory">Tin Factory / KR Puram Node [BTP Blackspot - 1 Strike]</option>
+              <option value="btp_hebbal">Hebbal Flyover Expressway [BTP Blackspot - 1 Strike]</option>
+              <option value="btp_marathahalli">Marathahalli Multiplex Junction [BTP Blackspot - 1 Strike]</option>
+              <option value="btp_ecity_toll">Electronic City Tollway Exit [BTP Blackspot - 1 Strike]</option>
+            </select>
+          </div>
+          <div class="state-card" id="state-tracker-card">
+            <div class="state-card-header"><span>DriveSafe State Machine:</span><span class="status-indicator" id="fsm-status-badge">STATIONARY / UNLOCKED</span></div>
+            <div class="state-metrics-grid">
+              <div class="metric-box"><div class="m-title">Touch Shield</div><div class="m-val" id="shield-active-val">OFF</div></div>
+              <div class="metric-box"><div class="m-title">Debounce Buffer</div><div class="m-val" id="debounce-val">READY</div></div>
+              <div class="metric-box"><div class="m-title">Driver Strikes</div><div class="m-val highlight" id="strikes-val">0 / 3</div></div>
+              <div class="metric-box"><div class="m-title">Safety Score</div><div class="m-val score" id="safety-score-val">100</div></div>
+            </div>
+          </div>
+          <div class="scenario-actions">
+            <div class="sec-title">Quick Test Scenarios</div>
+            <div class="scenario-grid">
+              <button class="scenario-btn" id="scenario-red-light"><strong>🚦 Red Light Stop</strong><small>Drop speed to 0 &rarr; test 4s debounce lock</small></button>
+              <button class="scenario-btn" id="scenario-enter-silkboard"><strong>📍 Enter Silk Board</strong><small>Engage zero-tolerance 1-strike mode</small></button>
+              <button class="scenario-btn" id="scenario-tap-blocked"><strong>❌ Tap Profile While Moving</strong><small>Attempt illegal interaction at 40 km/h</small></button>
+              <button class="scenario-btn" id="scenario-tap-sos"><strong>🆘 Tap SOS at 60 km/h</strong><small>Test guaranteed safety punch-through</small></button>
+            </div>
+          </div>
+        </section>
+        <section class="phone-viewport-container">
+          <div class="phone-frame">
+            <div class="phone-notch"><span class="camera-dot"></span><span class="speaker-grill"></span></div>
+            <div class="phone-screen" id="driver-phone-screen">
+              <div class="driver-app-topbar">
+                <div class="driver-profile-pill interactive-target" data-target-type="BLOCKED_MENU" id="btn-driver-profile">
+                  <span class="avatar">👨🏽‍💼</span>
+                  <div class="driver-name-col"><strong>Ramesh K.</strong><span class="rating">⭐ 4.92 (542 trips)</span></div>
+                </div>
+                <button class="btn-sos interactive-target" data-target-type="SOS" id="btn-emergency-sos"><span>🚨 SOS</span></button>
+              </div>
+              <div class="map-container interactive-target" data-target-type="MAP" id="main-navigation-map">
+                <div class="map-overlay-badge"><span class="map-pin">📍</span><div><strong id="current-location-text">Indiranagar 100ft Road</strong><div id="route-eta">Destination: 2.4 km &bull; 7 mins</div></div></div>
+                <div class="vehicle-marker" id="vehicle-marker"><div class="radar-ping"></div><div class="bike-icon">🏍️</div></div>
+                <div class="map-touch-helper"><span>Map Area (Always Toucheable for Navigation)</span></div>
+              </div>
+              <div class="driver-action-dock">
+                <div class="order-card">
+                  <div class="order-header"><span class="order-badge">Active Delivery</span><span class="order-price">₹124 Payout</span></div>
+                  <div class="order-info"><strong>Order #8291 &bull; Meghana Foods Biryani</strong><p>Deliver to Koramangala 4th Block</p></div>
+                </div>
+                <div class="dock-buttons-row">
+                  <button class="dock-btn interactive-target" data-target-type="BLOCKED_MENU" id="btn-chat-customer">💬 Chat Customer</button>
+                  <button class="dock-btn interactive-target" data-target-type="BLOCKED_MENU" id="btn-earnings">💰 Daily Earnings</button>
+                  <button class="dock-btn interactive-target" data-target-type="BLOCKED_MENU" id="btn-trip-history">📜 Trip History</button>
+                </div>
+              </div>
+              <div class="drivesafe-shield-overlay hidden" id="drivesafe-shield">
+                <div class="shield-alert-banner hidden" id="shield-alert-banner">
+                  <div class="alert-icon">⚠️</div>
+                  <div class="alert-content"><strong id="alert-title">TOUCH BLOCKED WHILE MOVING!</strong><p id="alert-desc">Keep your eyes on the road. Sub-menus locked.</p></div>
+                </div>
+                <div class="debounce-countdown-overlay hidden" id="debounce-countdown-banner">
+                  <div class="countdown-circle"><span id="debounce-seconds-number">4</span></div>
+                  <div class="countdown-text"><strong>Traffic Stop Debounce Active</strong><p>Screen unlocked in <span id="debounce-sub-sec">4</span> seconds of stationary rest</p></div>
+                </div>
+              </div>
+            </div>
+            <div class="phone-home-indicator"></div>
+          </div>
+        </section>
+        <section class="panel audit-panel">
+          <div class="panel-header"><h2>📜 Real-Time Security Logs</h2><button class="btn-sm" id="btn-clear-logs">Clear</button></div>
+          <div class="telemetry-log-stream" id="log-stream"><div class="log-entry system"><span class="time">[INIT]</span><span class="msg">DriveSafe Core SDK v2.4 initialized. Telematics thread active.</span></div></div>
+          <div class="insurer-compliance-box">
+            <div class="ins-header"><span>Commercial Insurer Status</span><span class="ins-badge" id="ins-discount-badge">ELIGIBLE FOR -20% PREMIUM</span></div>
+            <p class="ins-desc">All touch infractions, GPS stamps, and BTP hotspot crossings are digitally signed and AES encrypted for tamper-proof underwriter audits.</p>
+          </div>
+        </section>
+      </main>
+      <div class="modal-backdrop hidden" id="payload-modal">
+        <div class="modal-box">
+          <div class="modal-header"><h3>🔐 Commercial Insurer Telematics Payload</h3><button class="btn-close" id="btn-close-modal">✕</button></div>
+          <div class="modal-body"><p>This payload is generated by DriveSafe SDK and submitted to commercial underwriters (e.g. Digit, ICICI Lombard, Acko) to certify driving compliance.</p><pre class="json-preview" id="payload-json-content"></pre></div>
+          <div class="modal-footer"><button class="btn-secondary" id="btn-copy-payload">📋 Copy JSON</button><button class="btn-primary" id="btn-dismiss-modal">Done</button></div>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="/main.ts"></script>
+  </body>
+</html>

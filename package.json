@@ -1,0 +1,16 @@
+{
+  "name": "@drivesafe/core",
+  "version": "1.0.0",
+  "description": "Enterprise Telematics & In-App UI Touch Enforcement SDK for Gig-Economy Fleets",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "lucide": "^1.59.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.4"
+  }
+}
